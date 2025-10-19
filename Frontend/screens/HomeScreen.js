@@ -1,17 +1,289 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useMemo, useRef, useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  ScrollView,
+  LayoutAnimation,
+  UIManager,
+  Platform,
+  Modal,
+  TextInput,
+} from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
+import ReviewModal from '../components/ReviewModal';
+import OptOutModal from '../components/OptOutModal';
+import OptOutRangeModal from '../components/OptOutRangeModal';
+
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
+function getDateArray(centerDate, days = 7) {
+  const arr = [];
+  const start = new Date(centerDate);
+  start.setDate(start.getDate() - Math.floor(days / 2));
+  for (let i = 0; i < days; i++) {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    arr.push(d);
+  }
+  return arr;
+}
+
+// Futuristic palette (ordered): violet -> cyan -> teal -> neon-orange
+const MEALS = [
+  { key: 'breakfast', label: 'Breakfast', time: '7:00 - 9:00', color: '#7c3aed' },
+  { key: 'lunch', label: 'Lunch', time: '12:00 - 14:00', color: '#06b6d4' },
+  { key: 'snacks', label: 'Snacks', time: '16:00 - 17:00', color: '#0ea5a4' },
+  { key: 'dinner', label: 'Dinner', time: '19:00 - 21:00', color: '#ff7a59' },
+];
+
+// mock menu items generator (same for all days for now)
+function mockMenuFor(mealKey) {
+  switch (mealKey) {
+    case 'breakfast':
+      return ['Eggs', 'Toast', 'Tea', 'Fruit'];
+    case 'lunch':
+      return ['Rice', 'Dal', 'Sabzi', 'Salad'];
+    case 'snacks':
+      return ['Samosa', 'Tea', 'Juice'];
+    case 'dinner':
+      return ['Chapati', 'Paneer Curry', 'Raita'];
+    default:
+      return [];
+  }
+}
+
+function lightenColor(hex, factor) {
+  // Blend color toward white by factor (0..1). factor=0 => original, factor=1 => white
+  const c = hex.replace('#', '');
+  const num = parseInt(c, 16);
+  const r = (num >> 16) & 0xff;
+  const g = (num >> 8) & 0xff;
+  const b = num & 0xff;
+  const nr = Math.round(r + (255 - r) * factor);
+  const ng = Math.round(g + (255 - g) * factor);
+  const nb = Math.round(b + (255 - b) * factor);
+  return `rgb(${nr}, ${ng}, ${nb})`;
+}
+
+function mealIconName(key) {
+  switch (key) {
+    case 'breakfast':
+      return 'free-breakfast';
+    case 'lunch':
+      return 'sunny';
+    case 'snacks':
+      return 'fastfood';
+    case 'dinner':
+      return 'restaurant';
+    default:
+      return 'restaurant-menu';
+  }
+}
 
 export default function HomeScreen() {
+  const today = useMemo(() => new Date(), []);
+  const dates = useMemo(() => getDateArray(today, 11), [today]);
+  const [selectedDateIndex, setSelectedDateIndex] = useState(Math.floor(dates.length / 2));
+  const dateListRef = useRef(null);
+  const [expanded, setExpanded] = useState({});
+  const [reviewModalVisible, setReviewModalVisible] = useState(false);
+  const [optOutModalVisible, setOptOutModalVisible] = useState(false);
+  const [optOutRangeVisible, setOptOutRangeVisible] = useState(false);
+  const [optOutRangeConfirmData, setOptOutRangeConfirmData] = useState(null);
+  const [activeReview, setActiveReview] = useState(null);
+  const [rating, setRating] = useState(0);
+  const [reviewText, setReviewText] = useState('');
+  const [activeOptOut, setActiveOptOut] = useState(null);
+  const [optReasonOpen, setOptReasonOpen] = useState(false);
+  const [optReason, setOptReason] = useState('');
+
+  function toggleExpand(mealKey) {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setExpanded(prev => ({ ...prev, [mealKey]: !prev[mealKey] }));
+  }
+
+  function renderDate({ item, index }) {
+    const isActive = index === selectedDateIndex;
+    const label = item.toLocaleDateString(undefined, { weekday: 'short' });
+    const day = item.getDate();
+    return (
+      <TouchableOpacity style={[styles.dateItem, isActive && styles.dateItemActive]} onPress={() => { setSelectedDateIndex(index); if (dateListRef.current) { dateListRef.current.scrollToIndex({ index, animated: true, viewPosition: 0.5 }); } }}>
+        <Text style={[styles.dateLabel, isActive && styles.dateLabelActive]}>{label}</Text>
+        <Text style={[styles.dateDay, isActive && styles.dateDayActive]}>{day}</Text>
+      </TouchableOpacity>
+    );
+  }
+
+  // center the selected date on mount
+  useEffect(() => {
+    const idx = selectedDateIndex;
+    if (dateListRef.current && typeof idx === 'number') {
+      setTimeout(() => {
+        try {
+          dateListRef.current.scrollToIndex({ index: idx, animated: false, viewPosition: 0.5 });
+        } catch (e) {
+          // ignore; fallback will just render normally
+        }
+      }, 80);
+    }
+  }, [dateListRef, selectedDateIndex]);
+
+  const selectedDate = dates[selectedDateIndex];
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Home</Text>
-      <Text style={styles.body}>Welcome to the Home screen of MessWorld.</Text>
+    <View style={styles.screen}>
+      <Text style={styles.header}>Menu For The Day</Text>
+
+      <View style={styles.dateStrip}>
+        <FlatList ref={dateListRef} data={dates} horizontal keyExtractor={d => d.toISOString()} renderItem={renderDate} showsHorizontalScrollIndicator={false} contentContainerStyle={styles.dateListContent} />
+      </View>
+
+      <ScrollView style={styles.meals} contentContainerStyle={{ paddingBottom: 60 }}>
+        <Text style={styles.subHeader}>Menus for {selectedDate.toLocaleDateString()}</Text>
+
+        {MEALS.map(meal => {
+          const items = mockMenuFor(meal.key);
+          const isOpen = !!expanded[meal.key];
+          return (
+            <View key={meal.key} style={[styles.mealCard, styles.mealCardShadow]}>
+              <TouchableOpacity onPress={() => toggleExpand(meal.key)} style={[styles.mealHeader, { backgroundColor: meal.color, shadowColor: meal.color }] }>
+                <View style={styles.mealHeaderLeft}>
+                  <View style={[styles.headerIconWrap, { backgroundColor: 'rgba(255,255,255,0.12)' }]}>
+                    <MaterialIcons name={mealIconName(meal.key)} size={20} color="#fff" />
+                  </View>
+                  <View>
+                    <Text style={[styles.mealLabel, { color: '#fff', textShadowColor: meal.color, textShadowOffset: { width: 0, height: 6 }, textShadowRadius: 12 }]}>{meal.label}</Text>
+                    <Text style={[styles.mealTime, { color: 'rgba(255,255,255,0.9)' }]}>{meal.time}</Text>
+                  </View>
+                </View>
+                <MaterialIcons name={isOpen ? 'expand-less' : 'chevron-right'} size={28} color="rgba(255,255,255,0.95)" />
+              </TouchableOpacity>
+
+              {isOpen && (
+                    <View style={[styles.mealBody, { backgroundColor: lightenColor(meal.color, 0.88) }]}>
+                      {items.map((it, idx) => (
+                        <Text key={idx} style={styles.menuItem}>• {it}</Text>
+                      ))}
+
+                      <View style={[styles.footerRow, { padding: 12, borderRadius: 12, marginTop: 14 }] }>
+                        <TouchableOpacity style={[styles.footerBtn, { backgroundColor: 'rgba(0,0,0,0.18)', borderColor: 'rgba(255,255,255,0.06)' }]} onPress={() => { setActiveReview(meal); setReviewModalVisible(true); }}>
+                          <View style={[styles.iconCircle, { backgroundColor: 'rgba(255,255,255,0.06)' }]}>
+                            <MaterialIcons name="rate-review" size={18} color={meal.color} />
+                          </View>
+                          <Text style={[styles.footerBtnText, { color: '#fff' }]}>Review</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity style={[styles.footerBtn, styles.outBtn, { backgroundColor: meal.color, shadowColor: meal.color }]} onPress={() => { setActiveOptOut(meal); setOptOutModalVisible(true); }}>
+                          <View style={[styles.iconCircle, { backgroundColor: 'rgba(255,255,255,0.12)' }]}>
+                            <MaterialIcons name="block" size={18} color="#fff" />
+                          </View>
+                          <Text style={[styles.footerBtnText, { color: '#fff' }]}>Opt out</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  )}
+            </View>
+          );
+        })}
+
+        <View style={styles.optOutButtonContainer}>
+          <TouchableOpacity onPress={() => setOptOutRangeVisible(true)} style={styles.optOutButton}>
+            <Text style={styles.optOutButtonText}>Opt out for all meals — {selectedDate.toLocaleDateString()}</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+          <ReviewModal visible={reviewModalVisible} onClose={() => setReviewModalVisible(false)} onSubmit={(data) => console.log('review', data)} mealLabel={activeReview?.label} />
+          <OptOutModal visible={optOutModalVisible} onClose={() => setOptOutModalVisible(false)} onConfirm={(data) => console.log('optout', data)} mealLabel={activeOptOut?.label} />
+          <OptOutRangeModal visible={optOutRangeVisible} onClose={() => setOptOutRangeVisible(false)} onConfirm={(data) => { setOptOutRangeVisible(false); setTimeout(() => setOptOutRangeConfirmData(data), 220); }} defaultDate={selectedDate} dates={dates} />
+
+          {/* Confirmation dialog shown after user selects opt-out range in the modal */}
+          <Modal visible={!!optOutRangeConfirmData} transparent animationType="fade">
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalCard}>
+                <Text style={styles.modalTitle}>Confirm Opt-out</Text>
+                {optOutRangeConfirmData && (
+                  <View>
+                    <Text style={{ marginBottom: 8 }}>You are opting out of all meals for:</Text>
+                    <Text style={{ fontWeight: '700' }}>{optOutRangeConfirmData.multiple ? `${optOutRangeConfirmData.startDate.toLocaleDateString()} — ${optOutRangeConfirmData.endDate.toLocaleDateString()}` : `${optOutRangeConfirmData.startDate.toLocaleDateString()}`}</Text>
+                  </View>
+                )}
+
+                <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 18 }}>
+                  <TouchableOpacity onPress={() => { setOptOutRangeConfirmData(null); setOptOutRangeVisible(true); }} style={{ padding: 8, marginRight: 8 }}>
+                    <Text>Back</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => {
+                    // finalize opt-out (placeholder)
+                    console.log('optout-final', optOutRangeConfirmData);
+                    setOptOutRangeConfirmData(null);
+                    // small success confirmation could be shown here
+                  }} style={styles.confirmBtn}>
+                    <Text style={styles.confirmBtnText}>Confirm</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </Modal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 16 },
-  title: { fontSize: 24, fontWeight: '700', marginBottom: 8 },
-  body: { fontSize: 16, textAlign: 'center' },
+  dateListContent: { paddingHorizontal: 60, alignItems: 'center' },
+  screen: { flex: 1, backgroundColor: '#fff' },
+  header: 
+  { 
+    fontSize: 22, 
+    fontWeight: '700', 
+    padding: 16,
+    textAlign: 'center',
+    padding: 20,
+  },
+  dateStrip: { paddingLeft: 12, paddingBottom: 8},
+  dateItem: { width: 72, height: 72, borderRadius: 12, backgroundColor: '#f2f2f6', marginRight: 10, alignItems: 'center', justifyContent: 'center' },
+  dateItemActive: { backgroundColor: '#7c3aed', shadowColor: '#7c3aed', shadowOpacity: 0.4, shadowOffset: { width: 0, height: 8 }, shadowRadius: 16, elevation: 8 },
+  dateLabel: { fontSize: 12, color: '#666' },
+  dateLabelActive: { color: '#fff' },
+  dateDay: { fontSize: 20, fontWeight: '700', marginTop: 4 },
+  dateDayActive: { color: '#fff' },
+  meals: { flex: 1, paddingHorizontal: 16 },
+  subHeader: 
+  { 
+    fontSize: 16, 
+    fontWeight: '600', 
+    marginVertical: 8, 
+    textAlign: 'center',
+  },
+  mealCard: { marginBottom: 12, borderRadius: 12, overflow: 'hidden', backgroundColor: 'transparent' },
+  mealCardShadow: { shadowColor: '#000', shadowOpacity: 0.12, shadowOffset: { width: 0, height: 10 }, shadowRadius: 24, elevation: 10 },
+  mealHeader: { flexDirection: 'row', justifyContent: 'space-between', padding: 14, alignItems: 'center' },
+  mealHeaderLeft: { flexDirection: 'row', alignItems: 'center' },
+  headerIconWrap: { width: 42, height: 42, borderRadius: 10, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
+  mealLabel: { fontSize: 16, fontWeight: '800' },
+  mealTime: { fontSize: 12, color: 'rgba(0,0,0,0.65)' },
+  mealBody: { padding: 14, borderBottomLeftRadius: 12, borderBottomRightRadius: 12, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.06)' },
+  menuItem: { paddingVertical: 6, fontSize: 15 },
+  footerRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 },
+  footerBtn: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 14, borderRadius: 12, borderWidth: 1, borderColor: 'transparent' },
+  outBtn: { /* placeholder: color applied inline */ },
+  footerBtnText: { color: '#fff', marginLeft: 10, fontWeight: '800' },
+  iconCircle: { width: 34, height: 34, borderRadius: 10, alignItems: 'center', justifyContent: 'center', marginRight: 8 },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'center', padding: 16 },
+  modalCard: { backgroundColor: '#fff', borderRadius: 12, padding: 16 },
+  modalTitle: { fontSize: 18, fontWeight: '700', marginBottom: 12 },
+  starRow: { flexDirection: 'row', justifyContent: 'space-around', marginBottom: 12 },
+  modalInput: { minHeight: 80, borderWidth: 1, borderColor: '#eee', borderRadius: 8, padding: 8, textAlignVertical: 'top' },
+  modalClose: { padding: 8 },
+  picker: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 12, borderWidth: 1, borderColor: '#eee', borderRadius: 8, marginTop: 8 },
+  pickerOptions: { marginTop: 8, backgroundColor: '#fff', borderRadius: 8, padding: 8, borderWidth: 1, borderColor: '#eee' },
+  optOutButtonContainer: { alignItems: 'flex-end', paddingHorizontal: 12, marginTop: 6, marginBottom: 40 },
+  optOutButton: { backgroundColor: '#111', paddingVertical: 10, paddingHorizontal: 12, borderRadius: 10 },
+  optOutButtonText: { color: '#fff', fontWeight: '700' },
+  confirmBtn: { backgroundColor: '#06b6d4', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 8 },
+  confirmBtnText: { color: '#fff', fontWeight: '700' },
 });
