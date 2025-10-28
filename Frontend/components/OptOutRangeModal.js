@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Modal, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import useResponsive from '../utils/responsive';
 
 function sameDay(a, b) {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
@@ -10,6 +11,7 @@ export default function OptOutRangeModal({ visible, onClose, onConfirm, defaultD
   const [multiple, setMultiple] = useState(false);
   const [startIndex, setStartIndex] = useState(0);
   const [endIndex, setEndIndex] = useState(0);
+  const { rs, wp, width } = useResponsive();
 
   // create internal dates list: today .. today+14 (15 days) — no past dates allowed
   const today = new Date();
@@ -43,6 +45,7 @@ export default function OptOutRangeModal({ visible, onClose, onConfirm, defaultD
     const selected = (!multiple && index === startIndex) || (multiple && (index === startIndex || index === endIndex || (index > startIndex && index < endIndex)));
     // all internalDates are today or future, so none are disabled; keep structure for clarity
     const disabled = false;
+    const size = Math.max(56, Math.min(84, Math.round(width * 0.13)));
     return (
       <TouchableOpacity
         disabled={disabled}
@@ -65,9 +68,9 @@ export default function OptOutRangeModal({ visible, onClose, onConfirm, defaultD
             setEndIndex(chosen);
           }
         }}
-        style={[styles.dateCard, selected && styles.dateCardSel, disabled && { opacity: 0.4 }]}>
-        <Text style={[styles.dateLabelSmall]}>{item.toLocaleDateString(undefined, { weekday: 'short' })}</Text>
-        <Text style={[styles.dateDaySmall]}>{item.getDate()}</Text>
+        style={[styles.dateCard, { width: size, height: size, borderRadius: Math.round(size * 0.14) }, selected && styles.dateCardSel, disabled && { opacity: 0.4 }]}>
+        <Text style={[styles.dateLabelSmall, { fontSize: Math.max(11, rs(12)) }]}>{item.toLocaleDateString(undefined, { weekday: 'short' })}</Text>
+        <Text style={[styles.dateDaySmall, { fontSize: Math.max(16, rs(18)) }]}>{item.getDate()}</Text>
       </TouchableOpacity>
     );
   }
@@ -75,13 +78,13 @@ export default function OptOutRangeModal({ visible, onClose, onConfirm, defaultD
   return (
     <Modal visible={visible} transparent animationType="slide">
       <View style={styles.overlay}>
-        <View style={styles.card}>
+        <View style={[styles.card, { marginHorizontal: wp(10) }]}>
           <Text style={styles.title}>Opt out — All meals for {defaultDate.toLocaleDateString()}</Text>
           <Text style={styles.disclaimer}>Opt out of all meals for the selected day or a range of days. Abuse may lead to restrictions.</Text>
 
-          <TouchableOpacity style={styles.multRow} onPress={() => setMultiple(m => !m)}>
-            <MaterialIcons name={multiple ? 'check-box' : 'check-box-outline-blank'} size={22} color={multiple ? '#06b6d4' : '#666'} />
-            <Text style={styles.multText}>Allow multiple days</Text>
+          <TouchableOpacity style={[styles.multRow, { paddingVertical: rs(6) }]} onPress={() => setMultiple(m => !m)}>
+            <MaterialIcons name={multiple ? 'check-box' : 'check-box-outline-blank'} size={rs(18)} color={multiple ? '#06b6d4' : '#666'} />
+            <Text style={[styles.multText, { fontSize: Math.max(13, rs(13)) }]}>Allow multiple days</Text>
           </TouchableOpacity>
 
           <View style={{ marginTop: 8 }}>
@@ -90,8 +93,8 @@ export default function OptOutRangeModal({ visible, onClose, onConfirm, defaultD
           </View>
 
           <View style={styles.rowRight}>
-            <TouchableOpacity onPress={onClose} style={styles.btn}><Text>Cancel</Text></TouchableOpacity>
-            <TouchableOpacity onPress={confirm} style={[styles.btn, styles.primary]}><Text style={{color:'#fff'}}>Confirm</Text></TouchableOpacity>
+            <TouchableOpacity onPress={onClose} style={styles.btn}><Text style={{ fontSize: Math.max(13, rs(13)) }}>Cancel</Text></TouchableOpacity>
+            <TouchableOpacity onPress={confirm} style={[styles.btn, styles.primary]}><Text style={{color:'#fff', fontSize: Math.max(13, rs(13))}}>Confirm</Text></TouchableOpacity>
           </View>
         </View>
       </View>

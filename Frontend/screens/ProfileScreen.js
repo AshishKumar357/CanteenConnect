@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { MaterialIcons } from '@expo/vector-icons';
+import useResponsive from '../utils/responsive';
 
 export default function ProfileScreen() {
   // initial sample data
@@ -33,6 +34,9 @@ export default function ProfileScreen() {
       }
     })();
   }, []);
+
+  const { width, rs } = useResponsive();
+  const avatarSize = Math.min(160, Math.round(width * 0.32));
 
   async function pickImage() {
     try {
@@ -74,11 +78,11 @@ export default function ProfileScreen() {
             onPress={() => {
               if (editing) pickImage();
             }}
-            style={styles.avatarWrapper}
+            style={[styles.avatarWrapper, { width: avatarSize, height: avatarSize, borderRadius: Math.round(avatarSize * 0.08) }]}
           >
             <Image
               source={photo ? { uri: photo } : require('../assets/profile.png')}
-              style={styles.avatar}
+              style={[styles.avatar, { width: avatarSize, height: avatarSize, borderRadius: Math.round(avatarSize * 0.08) }]}
             />
             {editing && (
               <View style={styles.cameraOverlay}>

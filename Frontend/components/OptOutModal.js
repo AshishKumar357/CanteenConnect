@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Modal, TouchableOpacity, StyleSheet } from 'react-native';
+import useResponsive from '../utils/responsive';
 import { MaterialIcons } from '@expo/vector-icons';
 
 const REASONS = ['Fast','Bad menu','Leave','Eating out','Ordered online','Others'];
@@ -7,6 +8,7 @@ const REASONS = ['Fast','Bad menu','Leave','Eating out','Ordered online','Others
 export default function OptOutModal({ visible, onClose, onConfirm, mealLabel }) {
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState('');
+  const { rs, wp } = useResponsive();
 
   useEffect(() => {
     if (!visible) { setOpen(false); setReason(''); }
@@ -20,13 +22,13 @@ export default function OptOutModal({ visible, onClose, onConfirm, mealLabel }) 
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <View style={styles.overlay}>
-        <View style={styles.card}>
-          <Text style={styles.title}>Opt out of meal{mealLabel ? ` — ${mealLabel}` : ''}</Text>
-          <Text style={styles.disclaimer}>By opting out, the mess will not cook this meal for you. Please do not falsify opt-out requests. Misuse may lead to restrictions.</Text>
+        <View style={[styles.card, { marginHorizontal: wp(10) }]}>
+          <Text style={[styles.title, { fontSize: rs(18) }]}>Opt out of meal{mealLabel ? ` — ${mealLabel}` : ''}</Text>
+          <Text style={[styles.disclaimer, { fontSize: Math.max(12, rs(13)) }]}>By opting out, the mess will not cook this meal for you. Please do not falsify opt-out requests. Misuse may lead to restrictions.</Text>
 
-          <TouchableOpacity style={styles.picker} onPress={() => setOpen(v => !v)}>
-            <Text>{reason || 'Select a reason'}</Text>
-            <MaterialIcons name={open ? 'keyboard-arrow-up' : 'keyboard-arrow-down'} size={20} />
+          <TouchableOpacity style={[styles.picker, { padding: rs(12) }]} onPress={() => setOpen(v => !v)}>
+            <Text style={{ fontSize: Math.max(13, rs(13)) }}>{reason || 'Select a reason'}</Text>
+            <MaterialIcons name={open ? 'keyboard-arrow-up' : 'keyboard-arrow-down'} size={rs(18)} />
           </TouchableOpacity>
 
           {open && (
@@ -40,8 +42,8 @@ export default function OptOutModal({ visible, onClose, onConfirm, mealLabel }) 
           )}
 
           <View style={styles.rowRight}>
-            <TouchableOpacity onPress={onClose} style={styles.btn}><Text>Cancel</Text></TouchableOpacity>
-            <TouchableOpacity onPress={confirm} style={[styles.btn, styles.primary]}><Text style={{color:'#fff'}}>Confirm</Text></TouchableOpacity>
+            <TouchableOpacity onPress={onClose} style={styles.btn}><Text style={{ fontSize: Math.max(13, rs(13)) }}>Cancel</Text></TouchableOpacity>
+            <TouchableOpacity onPress={confirm} style={[styles.btn, styles.primary]}><Text style={{color:'#fff', fontSize: Math.max(13, rs(13))}}>Confirm</Text></TouchableOpacity>
           </View>
         </View>
       </View>

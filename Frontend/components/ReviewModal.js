@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Modal, TouchableOpacity, TextInput, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import useResponsive from '../utils/responsive';
 
 export default function ReviewModal({ visible, onClose, onSubmit, mealLabel }) {
   const [rating, setRating] = useState(0);
   const [text, setText] = useState('');
+  const { rs, wp } = useResponsive();
 
   useEffect(() => {
     if (!visible) {
@@ -21,22 +23,22 @@ export default function ReviewModal({ visible, onClose, onSubmit, mealLabel }) {
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <View style={styles.overlay}>
-        <View style={styles.card}>
+        <View style={[styles.card, { marginHorizontal: wp(10) }]}>
           <Text style={styles.title}>Rate the food{mealLabel ? ` — ${mealLabel}` : ''}</Text>
 
           <View style={styles.stars}>
             {[1,2,3,4,5].map(s => (
               <TouchableOpacity key={s} onPress={() => setRating(s)}>
-                <MaterialIcons name={rating >= s ? 'star' : 'star-border'} size={32} color="#f59e0b" />
+                <MaterialIcons name={rating >= s ? 'star' : 'star-border'} size={rs(24)} color="#f59e0b" />
               </TouchableOpacity>
             ))}
           </View>
 
-          <TextInput placeholder="Write your comments (optional)" value={text} onChangeText={setText} multiline style={styles.input} />
+          <TextInput placeholder="Write your comments (optional)" value={text} onChangeText={setText} multiline style={[styles.input, { padding: Math.max(8, rs(8)) }]} />
 
           <View style={styles.rowRight}>
-            <TouchableOpacity onPress={onClose} style={styles.btn}><Text>Cancel</Text></TouchableOpacity>
-            <TouchableOpacity onPress={submit} style={[styles.btn, styles.primary]}><Text style={{color:'#fff'}}>Submit</Text></TouchableOpacity>
+            <TouchableOpacity onPress={onClose} style={styles.btn}><Text style={{ fontSize: Math.max(13, rs(13)) }}>Cancel</Text></TouchableOpacity>
+            <TouchableOpacity onPress={submit} style={[styles.btn, styles.primary]}><Text style={{color:'#fff', fontSize: Math.max(13, rs(13))}}>Submit</Text></TouchableOpacity>
           </View>
         </View>
       </View>

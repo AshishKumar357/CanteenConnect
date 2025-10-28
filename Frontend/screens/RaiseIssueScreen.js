@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import useResponsive from '../utils/responsive';
 
 const CATEGORIES = [
   'Quantity issue',
@@ -27,6 +28,8 @@ export default function RaiseIssueScreen() {
   const [category, setCategory] = useState(CATEGORIES[0]);
   const [description, setDescription] = useState('');
   const [pickerOpen, setPickerOpen] = useState(false);
+  const { width, rs } = useResponsive();
+  const thumbSize = Math.max(64, Math.min(120, Math.round(width * 0.18)));
 
   useEffect(() => {
     (async () => {
@@ -76,21 +79,21 @@ export default function RaiseIssueScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ padding: 16 }}>
-      <Text style={styles.header}>Report food issue</Text>
+      <Text style={[styles.header, { fontSize: Math.max(18, rs(22)) }]}>Report food issue</Text>
 
       <View style={styles.card}>
         <Text style={styles.label}>Attach photos (max 6)</Text>
         <View style={styles.imageRow}>
-          <TouchableOpacity style={styles.addThumb} onPress={addImage}>
-            <MaterialIcons name="add-a-photo" size={28} color="#6200ee" />
+          <TouchableOpacity style={[styles.addThumb, { width: thumbSize, height: thumbSize }]} onPress={addImage}>
+            <MaterialIcons name="add-a-photo" size={Math.max(20, rs(24))} color="#6200ee" />
             <Text style={styles.addText}>Add</Text>
           </TouchableOpacity>
 
           {images.map(uri => (
-            <View key={uri} style={styles.thumbWrap}>
-              <Image source={{ uri }} style={styles.thumb} />
+            <View key={uri} style={[styles.thumbWrap, { width: thumbSize, height: thumbSize }]}>
+              <Image source={{ uri }} style={[styles.thumb, { width: thumbSize, height: thumbSize }]} />
               <TouchableOpacity style={styles.removeBtn} onPress={() => removeImage(uri)}>
-                <MaterialIcons name="close" size={16} color="#fff" />
+                <MaterialIcons name="close" size={Math.max(14, rs(14))} color="#fff" />
               </TouchableOpacity>
             </View>
           ))}
@@ -101,7 +104,7 @@ export default function RaiseIssueScreen() {
           placeholder="Short title for the issue"
           value={title}
           onChangeText={setTitle}
-          style={styles.input}
+          style={[styles.input, { padding: Math.max(8, rs(10)) }]}
         />
 
         <Text style={[styles.label, { marginTop: 12 }]}>Category</Text>
@@ -126,13 +129,13 @@ export default function RaiseIssueScreen() {
           placeholder="Describe the problem, what you recommend, and any steps you took"
           value={description}
           onChangeText={setDescription}
-          style={[styles.input, styles.textarea]}
+          style={[styles.input, styles.textarea, { padding: Math.max(8, rs(10)) }]}
           multiline
           numberOfLines={6}
         />
 
-        <TouchableOpacity style={styles.submit} onPress={submit}>
-          <Text style={styles.submitText}>Submit</Text>
+        <TouchableOpacity style={[styles.submit, { paddingVertical: Math.max(12, rs(12)) }]} onPress={submit}>
+          <Text style={[styles.submitText, { fontSize: Math.max(14, rs(15)) }]}>Submit</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

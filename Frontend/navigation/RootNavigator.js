@@ -20,7 +20,7 @@ export default function RootNavigator() {
   return (
     <NavigationContainer ref={navRef}>
       <SafeAreaView style={{ flex: 1 }}>
-        <HeaderBar title="MessWorld" onHamburgerPress={() => setMenuOpen(m => !m)} />
+  <HeaderBar title="CanteenConnect" onHamburgerPress={() => setMenuOpen(m => !m)} />
 
         <View style={{ flex: 1 }}>
           <Stack.Navigator screenOptions={{ headerShown: false }}>

@@ -11,11 +11,14 @@ import {
   Platform,
   Modal,
   TextInput,
+  Animated,
+  Easing,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import ReviewModal from '../components/ReviewModal';
 import OptOutModal from '../components/OptOutModal';
 import OptOutRangeModal from '../components/OptOutRangeModal';
+import useResponsive from '../utils/responsive';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -90,6 +93,18 @@ export default function HomeScreen() {
   const dates = useMemo(() => getDateArray(today, 11), [today]);
   const [selectedDateIndex, setSelectedDateIndex] = useState(Math.floor(dates.length / 2));
   const dateListRef = useRef(null);
+  const { width, rs, wp } = useResponsive();
+  // spacing between date items in px (kept in sync with styles.dateItem marginRight)
+  const GAP = 10;
+  // compute a uniform date item size so we can center items precisely
+  const dateSize = Math.max(56, Math.min(96, Math.round(width * 0.14)));
+  // padding so the strip centers within the viewport (we render equal padding left/right)
+  const sidePad = Math.max(8, Math.round((width - dateSize) / 2));
+  // total content width of the date strip
+  const contentWidth = sidePad * 2 + dates.length * dateSize + Math.max(0, (dates.length - 1) * GAP);
+  // animated offset controller for smooth scrolling
+  const scrollAnim = useRef(new Animated.Value(0)).current;
+  const scrollAnimListener = useRef(null);
   const [expanded, setExpanded] = useState({});
   const [reviewModalVisible, setReviewModalVisible] = useState(false);
   const [optOutModalVisible, setOptOutModalVisible] = useState(false);
@@ -112,9 +127,21 @@ export default function HomeScreen() {
     const label = item.toLocaleDateString(undefined, { weekday: 'short' });
     const day = item.getDate();
     return (
-      <TouchableOpacity style={[styles.dateItem, isActive && styles.dateItemActive]} onPress={() => { setSelectedDateIndex(index); if (dateListRef.current) { dateListRef.current.scrollToIndex({ index, animated: true, viewPosition: 0.5 }); } }}>
-        <Text style={[styles.dateLabel, isActive && styles.dateLabelActive]}>{label}</Text>
-        <Text style={[styles.dateDay, isActive && styles.dateDayActive]}>{day}</Text>
+      <TouchableOpacity
+        style={[styles.dateItem, { width: dateSize, height: dateSize, borderRadius: Math.round(dateSize * 0.18) }, isActive && styles.dateItemActive]}
+        onPress={() => {
+          setSelectedDateIndex(index);
+          // center this index in the viewport by computing offset and animating
+          if (typeof index === 'number') {
+            try {
+              const itemCenter = sidePad + index * (dateSize + GAP) + dateSize / 2;
+              let offset = itemCenter - width / 2;
+              animateToOffset(offset, 380);
+            } catch (e) { /* ignore */ }
+          }
+        }}>
+        <Text style={[styles.dateLabel, isActive && styles.dateLabelActive, { fontSize: Math.max(11, rs(12)) }]}>{label}</Text>
+        <Text style={[styles.dateDay, isActive && styles.dateDayActive, { fontSize: Math.max(16, rs(20)) }]}>{day}</Text>
       </TouchableOpacity>
     );
   }
@@ -125,7 +152,14 @@ export default function HomeScreen() {
     if (dateListRef.current && typeof idx === 'number') {
       setTimeout(() => {
         try {
-          dateListRef.current.scrollToIndex({ index: idx, animated: false, viewPosition: 0.5 });
+          // center on mount using offset calculation (set value directly to avoid animation)
+          const itemCenter = sidePad + idx * (dateSize + GAP) + dateSize / 2;
+          let offset = itemCenter - width / 2;
+          const maxOffset = Math.max(0, contentWidth - width);
+          if (offset < 0) offset = 0;
+          if (offset > maxOffset) offset = maxOffset;
+          // sync animated value and set without animation
+          scrollAnim.setValue(offset);
         } catch (e) {
           // ignore; fallback will just render normally
         }
@@ -133,14 +167,51 @@ export default function HomeScreen() {
     }
   }, [dateListRef, selectedDateIndex]);
 
+  // whenever selectedDateIndex changes (user press or programmatic), ensure it's centered
+  useEffect(() => {
+    // add listener to drive the scroll view from animated value
+    if (!scrollAnimListener.current) {
+      scrollAnimListener.current = scrollAnim.addListener(({ value }) => {
+        if (dateListRef.current) {
+          try { dateListRef.current.scrollToOffset({ offset: value, animated: false }); } catch (e) { /* ignore */ }
+        }
+      });
+    }
+
+    return () => {
+      if (scrollAnimListener.current) {
+        scrollAnim.removeListener(scrollAnimListener.current);
+        scrollAnimListener.current = null;
+      }
+    };
+  }, []);
+
+  // helper to animate to an offset smoothly
+  function animateToOffset(targetOffset, duration = 360) {
+    const maxOffset = Math.max(0, contentWidth - width);
+    let final = targetOffset;
+    if (final < 0) final = 0;
+    if (final > maxOffset) final = maxOffset;
+    Animated.timing(scrollAnim, { toValue: final, duration, easing: Easing.out(Easing.cubic), useNativeDriver: false }).start();
+  }
+
   const selectedDate = dates[selectedDateIndex];
 
   return (
     <View style={styles.screen}>
-      <Text style={styles.header}>Menu For The Day</Text>
+      <Text style={[styles.header, { fontSize: Math.max(18, rs(22)), padding: Math.max(12, rs(14)) }]}>Menu For The Day</Text>
 
       <View style={styles.dateStrip}>
-        <FlatList ref={dateListRef} data={dates} horizontal keyExtractor={d => d.toISOString()} renderItem={renderDate} showsHorizontalScrollIndicator={false} contentContainerStyle={styles.dateListContent} />
+        <FlatList
+          ref={dateListRef}
+          data={dates}
+          horizontal
+          keyExtractor={d => d.toISOString()}
+          renderItem={renderDate}
+          showsHorizontalScrollIndicator={false}
+          getItemLayout={(data, index) => ({ length: dateSize + GAP, offset: sidePad + (dateSize + GAP) * index, index })}
+          contentContainerStyle={[styles.dateListContent, { paddingHorizontal: sidePad }]}
+        />
       </View>
 
       <ScrollView style={styles.meals} contentContainerStyle={{ paddingBottom: 60 }}>
@@ -151,17 +222,17 @@ export default function HomeScreen() {
           const isOpen = !!expanded[meal.key];
           return (
             <View key={meal.key} style={[styles.mealCard, styles.mealCardShadow]}>
-              <TouchableOpacity onPress={() => toggleExpand(meal.key)} style={[styles.mealHeader, { backgroundColor: meal.color, shadowColor: meal.color }] }>
+              <TouchableOpacity onPress={() => toggleExpand(meal.key)} style={[styles.mealHeader, { backgroundColor: meal.color, shadowColor: meal.color, padding: Math.max(10, rs(12)) }] }>
                 <View style={styles.mealHeaderLeft}>
-                  <View style={[styles.headerIconWrap, { backgroundColor: 'rgba(255,255,255,0.12)' }]}>
-                    <MaterialIcons name={mealIconName(meal.key)} size={20} color="#fff" />
+                  <View style={[styles.headerIconWrap, { backgroundColor: 'rgba(255,255,255,0.12)', width: Math.max(36, rs(42)), height: Math.max(36, rs(42)) }]}>
+                    <MaterialIcons name={mealIconName(meal.key)} size={Math.max(16, rs(18))} color="#fff" />
                   </View>
                   <View>
-                    <Text style={[styles.mealLabel, { color: '#fff', textShadowColor: meal.color, textShadowOffset: { width: 0, height: 6 }, textShadowRadius: 12 }]}>{meal.label}</Text>
-                    <Text style={[styles.mealTime, { color: 'rgba(255,255,255,0.9)' }]}>{meal.time}</Text>
+                    <Text style={[styles.mealLabel, { color: '#fff', textShadowColor: meal.color, textShadowOffset: { width: 0, height: 6 }, textShadowRadius: 12, fontSize: Math.max(14, rs(16)) }]}>{meal.label}</Text>
+                    <Text style={[styles.mealTime, { color: 'rgba(255,255,255,0.9)', fontSize: Math.max(11, rs(12)) }]}>{meal.time}</Text>
                   </View>
                 </View>
-                <MaterialIcons name={isOpen ? 'expand-less' : 'chevron-right'} size={28} color="rgba(255,255,255,0.95)" />
+                <MaterialIcons name={isOpen ? 'expand-less' : 'chevron-right'} size={Math.max(22, rs(26))} color="rgba(255,255,255,0.95)" />
               </TouchableOpacity>
 
               {isOpen && (
@@ -204,7 +275,7 @@ export default function HomeScreen() {
           {/* Confirmation dialog shown after user selects opt-out range in the modal */}
           <Modal visible={!!optOutRangeConfirmData} transparent animationType="fade">
             <View style={styles.modalOverlay}>
-              <View style={styles.modalCard}>
+          <View style={[styles.modalCard, { marginHorizontal: wp(10) }]}>
                 <Text style={styles.modalTitle}>Confirm Opt-out</Text>
                 {optOutRangeConfirmData && (
                   <View>

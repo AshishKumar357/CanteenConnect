@@ -1,11 +1,13 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import useResponsive from '../utils/responsive';
 
 export default function ActivityScreen() {
+  const { rs } = useResponsive();
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Activity</Text>
-      <Text style={styles.body}>Your recent activity will appear here.</Text>
+      <Text style={[styles.title, { fontSize: Math.max(20, rs(22)) }]}>Activity</Text>
+      <Text style={[styles.body, { fontSize: Math.max(13, rs(14)) }]}>Your recent activity will appear here.</Text>
     </View>
   );
 }

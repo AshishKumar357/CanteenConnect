@@ -1,16 +1,22 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import useResponsive from '../utils/responsive';
 
 export default function HeaderBar({ title, onHamburgerPress }) {
+  const { width, rs } = useResponsive();
+  const logoWidth = Math.min(160, Math.round(width * 0.28));
+  const logoHeight = Math.round(logoWidth * 0.5);
+  const titleFontSize = Math.max(16, rs(18));
+
   return (
     <View style={styles.header}>
       <View style={styles.left}>
-        <View style={styles.logoWrapper}>
-          <Image source={require('../assets/Sims_logo.png')} style={styles.logo} />
+        <View style={[styles.logoWrapper, { width: logoWidth, height: logoHeight }]}> 
+          <Image source={require('../assets/Logo wo bg.png')} style={[styles.logo, { width: logoWidth, height: logoHeight }]} />
         </View>
       </View>
 
-      <Text style={styles.title}>{title}</Text>
+      <Text style={[styles.title, { fontSize: titleFontSize }]}>{title}</Text>
 
       <TouchableOpacity
         accessibilityLabel="Open menu"

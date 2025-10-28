@@ -1,8 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
+import useResponsive from '../utils/responsive';
 
 function TogglePlaceholder({ title, description }) {
   const pulse = React.useRef(new Animated.Value(0)).current;
+  const { rs } = useResponsive();
   React.useEffect(() => {
     Animated.loop(
       Animated.sequence([
@@ -17,17 +19,17 @@ function TogglePlaceholder({ title, description }) {
   return (
     <View style={styles.row}>
       <View style={{ flex: 1 }}>
-        <Text style={styles.rowTitle}>{title}</Text>
-        <Text style={styles.rowDesc}>{description}</Text>
+        <Text style={[styles.rowTitle, { fontSize: rs(16) }]}>{title}</Text>
+        <Text style={[styles.rowDesc, { fontSize: Math.max(12, rs(12)) }]}>{description}</Text>
       </View>
 
       <View style={styles.rightWrap}>
-        <Animated.View style={[styles.coming, { transform: [{ scale: pulseScale }] }]}>
-          <Text style={styles.comingText}>Coming soon</Text>
+        <Animated.View style={[styles.coming, { transform: [{ scale: pulseScale }], paddingHorizontal: rs(8), paddingVertical: rs(6) }]}>
+          <Text style={[styles.comingText, { fontSize: Math.max(11, rs(11)) }]}>Coming soon</Text>
         </Animated.View>
 
-        <TouchableOpacity style={styles.toggle} activeOpacity={0.8} onPress={() => { /* noop */ }}>
-          <View style={styles.toggleKnob} />
+        <TouchableOpacity style={[styles.toggle, { width: Math.max(48, rs(52)), height: Math.max(28, rs(32)), padding: Math.max(4, rs(4)) }]} activeOpacity={0.8} onPress={() => { /* noop */ }}>
+          <View style={[styles.toggleKnob, { width: Math.max(20, rs(22)), height: Math.max(20, rs(22)), borderRadius: Math.max(10, rs(11)) }]} />
         </TouchableOpacity>
       </View>
     </View>
@@ -35,9 +37,10 @@ function TogglePlaceholder({ title, description }) {
 }
 
 export default function SettingsScreen() {
+  const { rs } = useResponsive();
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Settings</Text>
+      <Text style={[styles.title, { fontSize: Math.max(20, rs(22)) }]}>Settings</Text>
 
       <View style={styles.card}>
         <TogglePlaceholder title="Dark mode" description="A modern dark theme for the app." />

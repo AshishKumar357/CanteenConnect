@@ -5,7 +5,7 @@ This folder contains an Expo-managed React Native app. It is intended to be run 
 Quick start (PowerShell on Windows):
 
 ```powershell
-cd E:\Project\MessWorld\Frontend
+cd E:\Project\CanteenConnect\Frontend
 npm install
 npm start   # opens Expo dev tools (scan QR with Expo Go or press 'a' to open Android emulator)
 ```
