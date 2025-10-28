@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import useResponsive from '../utils/responsive';
+import { getUnreadCount } from '../data/updates';
 
 export default function SlideMenu({ open, onClose, navRef }) {
   const { width, rs } = useResponsive();
@@ -66,6 +67,9 @@ export default function SlideMenu({ open, onClose, navRef }) {
           <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('Updates')}>
             <MaterialIcons name="update" size={rs(18)} color="#333" style={styles.menuIcon} />
             <Text style={[styles.menuItemText, { fontSize: rs(14) }]} numberOfLines={1} ellipsizeMode="tail">Updates</Text>
+            {getUnreadCount() > 0 && (
+              <View style={styles.unreadBadge}><Text style={styles.unreadText}>{getUnreadCount()}</Text></View>
+            )}
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('Profile')}>
@@ -77,7 +81,7 @@ export default function SlideMenu({ open, onClose, navRef }) {
             <MaterialIcons name="history" size={rs(18)} color="#333" style={styles.menuIcon} />
             <Text style={[styles.menuItemText, { fontSize: rs(14) }]} numberOfLines={1} ellipsizeMode="tail">Activity</Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('RaiseIssue')}>
             <MaterialIcons name="report-problem" size={rs(18)} color="#333" style={styles.menuIcon} />
             <Text style={[styles.menuItemText, { fontSize: rs(14) }]} numberOfLines={1} ellipsizeMode="tail">Raise an issue</Text>
@@ -137,6 +141,17 @@ const styles = StyleSheet.create({
     flex: 1,
     flexShrink: 1,
   },
+  unreadBadge: {
+    backgroundColor: '#ef4444',
+    minWidth: 22,
+    paddingHorizontal: 6,
+    height: 22,
+    borderRadius: 11,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 8,
+  },
+  unreadText: { color: '#fff', fontWeight: '700', fontSize: 12 },
   menuIcon: {
     width: 28,
     height: 28,

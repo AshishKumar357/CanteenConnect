@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, SectionList, Image } from 'react-native';
 import useResponsive from '../utils/responsive';
+import { SAMPLE } from '../data/updates';
 
 // categories palette and colors
 const CATEGORY_COLORS = {
@@ -9,15 +10,6 @@ const CATEGORY_COLORS = {
   'General Announcements': '#FFC107',
   'Others': '#9E9E9E',
 };
-
-// sample updates data (oldest first, newest last)
-const SAMPLE = [
-  { id: 'u1', date: new Date(2025, 9, 25, 9, 12), title: 'Menu update', description: 'New biryani will be served on Friday. Try it with raita!', image: require('../assets/icon.png'), category: 'Mess Updates' },
-  { id: 'u2', date: new Date(2025, 9, 25, 12, 30), title: 'Reminder', description: 'Please rate today\'s lunch to help us improve food quality.', image: require('../assets/icon.png'), category: 'General Announcements' },
-  { id: 'u3', date: new Date(2025, 9, 27, 8, 5), title: 'Festive special', description: 'Signup sheet available for the festive special next week. Limited seats.', image: require('../assets/icon.png'), category: 'General Announcements' },
-  { id: 'u4', date: new Date(2025, 9, 29, 10, 45), title: 'Maintenance notice', description: 'Water shutdown at noon today; please plan accordingly.', image: require('../assets/icon.png'), category: 'Ticket / Issue Updates', priority: 'urgent' },
-  { id: 'u5', date: new Date(2025, 9, 29, 18, 5), title: 'Tonight\'s dinner', description: 'We are adding extra salad portions to tonight\'s dinner.', image: require('../assets/icon.png') },
-];
 
 function groupByDate(items) {
   const map = new Map();
@@ -38,7 +30,7 @@ function groupByDate(items) {
 
 export default function UpdatesScreen() {
   const { rs, wp } = useResponsive();
-  const sections = useMemo(() => groupByDate(SAMPLE), []);
+  const sections = useMemo(() => groupByDate(SAMPLE), [SAMPLE]);
 
   function renderItem({ item }) {
     return (
