@@ -11,6 +11,7 @@ import SettingsScreen from '../screens/SettingsScreen';
 import SignOutScreen from '../screens/SignOutScreen';
 import RaiseIssueScreen from '../screens/RaiseIssueScreen';
 import ActivityScreen from '../screens/ActivityScreen';
+import UpdatesScreen from '../screens/UpdatesScreen';
 
 export default function RootNavigator() {
   const Stack = createNativeStackNavigator();
@@ -30,6 +31,7 @@ export default function RootNavigator() {
             <Stack.Screen name="SignOut" component={SignOutScreen} />
             <Stack.Screen name="RaiseIssue" component={RaiseIssueScreen} />
             <Stack.Screen name="Activity" component={ActivityScreen} />
+            <Stack.Screen name="Updates" component={UpdatesScreen} />
           </Stack.Navigator>
         </View>
 

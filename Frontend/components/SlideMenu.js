@@ -63,19 +63,24 @@ export default function SlideMenu({ open, onClose, navRef }) {
             <Text style={[styles.menuItemText, { fontSize: rs(14) }]} numberOfLines={1} ellipsizeMode="tail">Home</Text>
           </TouchableOpacity>
 
+          <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('Updates')}>
+            <MaterialIcons name="update" size={rs(18)} color="#333" style={styles.menuIcon} />
+            <Text style={[styles.menuItemText, { fontSize: rs(14) }]} numberOfLines={1} ellipsizeMode="tail">Updates</Text>
+          </TouchableOpacity>
+
           <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('Profile')}>
             <MaterialIcons name="person" size={rs(18)} color="#333" style={styles.menuIcon} />
             <Text style={[styles.menuItemText, { fontSize: rs(14) }]} numberOfLines={1} ellipsizeMode="tail">Profile</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('RaiseIssue')}>
-            <MaterialIcons name="report-problem" size={rs(18)} color="#333" style={styles.menuIcon} />
-            <Text style={[styles.menuItemText, { fontSize: rs(14) }]} numberOfLines={1} ellipsizeMode="tail">Raise an issue</Text>
-          </TouchableOpacity>
-
           <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('Activity')}>
             <MaterialIcons name="history" size={rs(18)} color="#333" style={styles.menuIcon} />
             <Text style={[styles.menuItemText, { fontSize: rs(14) }]} numberOfLines={1} ellipsizeMode="tail">Activity</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('RaiseIssue')}>
+            <MaterialIcons name="report-problem" size={rs(18)} color="#333" style={styles.menuIcon} />
+            <Text style={[styles.menuItemText, { fontSize: rs(14) }]} numberOfLines={1} ellipsizeMode="tail">Raise an issue</Text>
           </TouchableOpacity>
           
           <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('Settings')}>
