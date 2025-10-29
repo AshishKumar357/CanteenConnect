@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import useResponsive from '../utils/responsive';
+import theme from '../utils/theme';
 
 function TogglePlaceholder({ title, description }) {
   const pulse = React.useRef(new Animated.Value(0)).current;
@@ -14,11 +15,12 @@ function TogglePlaceholder({ title, description }) {
     ).start();
   }, [pulse]);
 
-  const pulseScale = pulse.interpolate({ inputRange: [0, 1], outputRange: [1, 1.4] });
+  // limit the pulse scale so the badge doesn't grow large enough to overlap other content
+  const pulseScale = pulse.interpolate({ inputRange: [0, 1], outputRange: [1, 1.12] });
 
   return (
-    <View style={styles.row}>
-      <View style={{ flex: 1 }}>
+      <View style={styles.row}>
+      <View style={{ flex: 1, paddingRight: 8 }}>
         <Text style={[styles.rowTitle, { fontSize: rs(16) }]}>{title}</Text>
         <Text style={[styles.rowDesc, { fontSize: Math.max(12, rs(12)) }]}>{description}</Text>
       </View>
@@ -40,9 +42,9 @@ export default function SettingsScreen() {
   const { rs } = useResponsive();
   return (
     <View style={styles.container}>
-      <Text style={[styles.title, { fontSize: Math.max(20, rs(22)) }]}>Settings</Text>
+      <Text style={[styles.title, { fontSize: Math.max(20, rs(22)), color: theme.colors.text }]}>Settings</Text>
 
-      <View style={styles.card}>
+      <View style={[styles.card, { backgroundColor: theme.colors.card }] }>
         <TogglePlaceholder title="Dark mode" description="A modern dark theme for the app." />
         <TogglePlaceholder title="Incognito mode" description="Hide activity and make submissions anonymous." />
       </View>
@@ -55,7 +57,7 @@ const styles = StyleSheet.create({
   { 
     flex: 1, 
     padding: 16, 
-    backgroundColor: '#fff' 
+    backgroundColor: theme.colors.background 
   },
   title: 
   { 
@@ -65,7 +67,7 @@ const styles = StyleSheet.create({
   },
   card: 
   { 
-    backgroundColor: '#f7f7fb', 
+    backgroundColor: theme.colors.card, 
     borderRadius: 12, 
     padding: 12 
   },
@@ -75,7 +77,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', 
     paddingVertical: 14, 
     borderBottomWidth: 1, 
-    borderColor: '#eee' 
+    borderColor: theme.colors.border 
   },
   rowTitle: 
   { 
@@ -84,28 +86,31 @@ const styles = StyleSheet.create({
   },
   rowDesc: 
   { 
-    color: '#666', 
+    color: theme.colors.muted,
     marginTop: 4 
   },
   rightWrap: 
   { 
     alignItems: 'center', 
-    justifyContent: 'center', 
-    width: 120, 
     flexDirection: 'row', 
-    justifyContent: 'flex-end' 
+    justifyContent: 'flex-end',
+    paddingLeft: 6,
+    // allow this area to size naturally so text can wrap without overlap
+    minWidth: 88,
+    flexShrink: 0,
   },
   coming: 
   { 
-    backgroundColor: '#e9defe', 
+    backgroundColor: theme.colors.accentSoft, 
     paddingHorizontal: 8, 
     paddingVertical: 6, 
     borderRadius: 16, 
-    marginRight: 40
+    marginRight: 12,
+    flexShrink: 0,
   },
   comingText: 
   { 
-    color: '#6b21a8',
+    color: theme.colors.accent,
     fontWeight: '700', 
     fontSize: 12 
   },
@@ -113,7 +118,7 @@ const styles = StyleSheet.create({
   { 
     width: 52, 
     height: 32, 
-    backgroundColor: '#ddd', 
+    backgroundColor: theme.colors.border, 
     borderRadius: 18, 
     justifyContent: 'center', 
     padding: 4 
@@ -122,7 +127,7 @@ const styles = StyleSheet.create({
   { 
     width: 24, 
     height: 24, 
-    backgroundColor: '#fff', 
+    backgroundColor: theme.colors.background, 
     borderRadius: 12, 
     elevation: 2 
  },

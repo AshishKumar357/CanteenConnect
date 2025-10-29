@@ -12,6 +12,7 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import { MaterialIcons } from '@expo/vector-icons';
 import useResponsive from '../utils/responsive';
+import theme from '../utils/theme';
 
 export default function ProfileScreen() {
   // initial sample data
@@ -67,80 +68,81 @@ export default function ProfileScreen() {
     }
   }
 
+  const sideMargin = Math.max(12, Math.round(width * 0.06));
+
   return (
-    <View style={styles.screen}>
-      {/* <Text style={styles.header}>Profile</Text> */}
+    <View style={[styles.screen, { paddingHorizontal: sideMargin }]}>
+      <View style={styles.cardColumn}>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => {
+            if (editing) pickImage();
+          }}
+    style={[styles.avatarWrapper, { width: avatarSize, height: avatarSize, borderRadius: Math.round(avatarSize / 2) }]}
+        >
+          <Image
+            source={photo ? { uri: photo } : require('../assets/profile.png')}
+            style={[styles.avatar, { width: avatarSize, height: avatarSize, borderRadius: Math.round(avatarSize / 2) }]}
+          />
+          {editing && (
+            <View style={styles.cameraOverlay}>
+              <MaterialIcons name="photo-camera" size={20} color={theme.colors.onPrimary} />
+            </View>
+          )}
+        </TouchableOpacity>
 
-      <View style={styles.card}>
-        <View style={styles.left}>
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => {
-              if (editing) pickImage();
-            }}
-            style={[styles.avatarWrapper, { width: avatarSize, height: avatarSize, borderRadius: Math.round(avatarSize * 0.08) }]}
-          >
-            <Image
-              source={photo ? { uri: photo } : require('../assets/profile.png')}
-              style={[styles.avatar, { width: avatarSize, height: avatarSize, borderRadius: Math.round(avatarSize * 0.08) }]}
-            />
-            {editing && (
-              <View style={styles.cameraOverlay}>
-                <MaterialIcons name="photo-camera" size={20} color="#fff" />
-              </View>
-            )}
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.right}>
-          <View style={styles.row}>
-            <Text style={styles.label}>Name:</Text>
+        <View style={styles.detailsColumn}>
+          <Text style={styles.displayName}>{name}</Text>
+          <Text style={styles.subtleText}>{division} • Roll {rollNumber}</Text>
+          <View style={styles.separator} />
+          <View style={styles.rowColumn}>
+            <Text style={styles.labelColumn}>Name</Text>
             {editing ? (
-              <TextInput value={name} onChangeText={setName} style={styles.input} />
+              <TextInput value={name} onChangeText={setName} style={styles.inputColumn} />
             ) : (
-              <Text style={styles.value}>{name}</Text>
-            )}
-          </View>
-
-          <View style={styles.row}>
-            <Text style={styles.label}>Division:</Text>
-            {editing ? (
-              <TextInput value={division} onChangeText={setDivision} style={styles.input} />
-            ) : (
-              <Text style={styles.value}>{division}</Text>
+              <Text style={styles.valueColumn}>{name}</Text>
             )}
           </View>
 
-          <View style={styles.row}>
-            <Text style={styles.label}>Roll number:</Text>
+          <View style={styles.rowColumn}>
+            <Text style={styles.labelColumn}>Division</Text>
             {editing ? (
-              <TextInput value={rollNumber} onChangeText={setRollNumber} style={styles.input} />
+              <TextInput value={division} onChangeText={setDivision} style={styles.inputColumn} />
             ) : (
-              <Text style={styles.value}>{rollNumber}</Text>
+              <Text style={styles.valueColumn}>{division}</Text>
             )}
           </View>
 
-          <View style={styles.row}>
-            <Text style={styles.label}>PRN:</Text>
+          <View style={styles.rowColumn}>
+            <Text style={styles.labelColumn}>Roll number</Text>
             {editing ? (
-              <TextInput value={prn} onChangeText={setPrn} style={styles.input} />
+              <TextInput value={rollNumber} onChangeText={setRollNumber} style={styles.inputColumn} />
             ) : (
-              <Text style={styles.value}>{prn}</Text>
+              <Text style={styles.valueColumn}>{rollNumber}</Text>
             )}
           </View>
 
-          <View style={styles.row}>
-            <Text style={styles.label}>Batch:</Text>
+          <View style={styles.rowColumn}>
+            <Text style={styles.labelColumn}>PRN</Text>
             {editing ? (
-              <TextInput value={batch} onChangeText={setBatch} style={styles.input} />
+              <TextInput value={prn} onChangeText={setPrn} style={styles.inputColumn} />
             ) : (
-              <Text style={styles.value}>{batch}</Text>
+              <Text style={styles.valueColumn}>{prn}</Text>
+            )}
+          </View>
+
+          <View style={styles.rowColumn}>
+            <Text style={styles.labelColumn}>Batch</Text>
+            {editing ? (
+              <TextInput value={batch} onChangeText={setBatch} style={styles.inputColumn} />
+            ) : (
+              <Text style={styles.valueColumn}>{batch}</Text>
             )}
           </View>
         </View>
       </View>
 
-      <TouchableOpacity style={styles.editButton} onPress={editing ? onEditSave : () => setEditing(true)}>
+      <TouchableOpacity style={[styles.editButton, { marginHorizontal: sideMargin }]} onPress={editing ? onEditSave : () => setEditing(true)}>
         <Text style={styles.editButtonText}>{editing ? 'Save' : 'Edit'}</Text>
       </TouchableOpacity>
     </View>
@@ -148,13 +150,16 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, padding: 16, backgroundColor: '#fff' },
+  screen: { flex: 1, paddingVertical: 16, backgroundColor: theme.colors.background },
   header: { fontSize: 22, fontWeight: '700', marginBottom: 12 },
-  card: { flexDirection: 'row', padding: 12, backgroundColor: '#f6f6f6', borderRadius: 8, marginHorizontal: '10%',},
-  left: { width: '36%', alignItems: 'center', justifyContent: 'center' },
-  right: { width: '64%', paddingLeft: 12, justifyContent: 'center' },
-  avatarWrapper: { width: 120, height: 120, borderRadius: 8, overflow: 'hidden' },
-  avatar: { width: 120, height: 120, borderRadius: 8, resizeMode: 'cover' },
+  cardColumn: { alignItems: 'center', padding: 18, backgroundColor: theme.colors.card, borderRadius: 12, shadowColor: theme.shadows.default, shadowOpacity: 0.06, shadowOffset: { width: 0, height: 6 }, shadowRadius: 12, elevation: 3 },
+  detailsColumn: { width: '100%', marginTop: 12 },
+  displayName: { fontSize: 20, fontWeight: '700', textAlign: 'center', marginTop: 8 },
+  subtleText: { textAlign: 'center', color: theme.colors.muted, marginTop: 4 },
+  separator: { height: 1, backgroundColor: theme.colors.border, marginVertical: 12 },
+  rowColumn: { marginBottom: 10 },
+  avatarWrapper: { borderRadius: 8, overflow: 'hidden' },
+  avatar: { resizeMode: 'cover' },
   cameraOverlay: {
     position: 'absolute',
     right: 6,
@@ -163,54 +168,30 @@ const styles = StyleSheet.create({
     padding: 6,
     borderRadius: 20,
   },
-  row: 
-  { 
-    flexDirection: 'row', 
-    marginBottom: 8, 
-    alignItems: 'center' 
-  },
-  label: 
-  { 
-    width: 110, 
-    fontWeight: '600' 
-  },
-  value: 
-  { 
-    flex: 1
-   },
-  input: 
-  { 
-    flex: 1, 
-    borderWidth: 1, 
-    borderColor: '#ddd', 
-    padding: 6, 
-    borderRadius: 4 
-  },
+  labelColumn: { fontWeight: '600', marginBottom: 6 },
+  valueColumn: { marginBottom: 6 },
+  inputColumn: { borderWidth: 1, borderColor: theme.colors.border, padding: 10, borderRadius: 10, backgroundColor: theme.colors.background },
   editButton: {
     marginTop: 18,
-    marginHorizontal: '10%',
     width: '80%',
-    backgroundColor: '#6200ee',
+  backgroundColor: theme.colors.primary,
     paddingVertical: 12,
     borderRadius: 6,
     alignItems: 'center',
+    alignSelf: 'center',
   },
-  editButtonText: 
-  { 
-    color: 'white', 
-    fontWeight: '700' 
-  },
+  editButtonText: { color: theme.colors.onPrimary, fontWeight: '700' },
   uploadButton: {
     marginTop: 12,
     alignSelf: 'center',
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 6,
-    backgroundColor: '#eee',
+    backgroundColor: theme.colors.border,
   },
   uploadText: 
   { 
-    color: '#333' 
+    color: theme.colors.text 
   },
 });
 

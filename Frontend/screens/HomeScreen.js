@@ -19,6 +19,7 @@ import ReviewModal from '../components/ReviewModal';
 import OptOutModal from '../components/OptOutModal';
 import OptOutRangeModal from '../components/OptOutRangeModal';
 import useResponsive from '../utils/responsive';
+import theme from '../utils/theme';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -36,12 +37,12 @@ function getDateArray(centerDate, days = 7) {
   return arr;
 }
 
-// Futuristic palette (ordered): violet -> cyan -> teal -> neon-orange
+// Meal palette: use dedicated meal tokens (keeps semantic meaning separate from generic status colors)
 const MEALS = [
-  { key: 'breakfast', label: 'Breakfast', time: '7:00 - 9:00', color: '#7c3aed' },
-  { key: 'lunch', label: 'Lunch', time: '12:00 - 14:00', color: '#06b6d4' },
-  { key: 'snacks', label: 'Snacks', time: '16:00 - 17:00', color: '#0ea5a4' },
-  { key: 'dinner', label: 'Dinner', time: '19:00 - 21:00', color: '#ff7a59' },
+  { key: 'breakfast', label: 'Breakfast', time: '7:00 - 9:00', color: theme.colors.mealBreakfast },
+  { key: 'lunch', label: 'Lunch', time: '12:00 - 14:00', color: theme.colors.mealLunch },
+  { key: 'snacks', label: 'Snacks', time: '16:00 - 17:00', color: theme.colors.mealSnacks },
+  { key: 'dinner', label: 'Dinner', time: '19:00 - 21:00', color: theme.colors.mealDinner },
 ];
 
 // mock menu items generator (same for all days for now)
@@ -198,7 +199,7 @@ export default function HomeScreen() {
   const selectedDate = dates[selectedDateIndex];
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, { backgroundColor: theme.colors.background }]}>
       <Text style={[styles.header, { fontSize: Math.max(18, rs(22)), padding: Math.max(12, rs(14)) }]}>Menu For The Day</Text>
 
       <View style={styles.dateStrip}>
@@ -225,11 +226,11 @@ export default function HomeScreen() {
               <TouchableOpacity onPress={() => toggleExpand(meal.key)} style={[styles.mealHeader, { backgroundColor: meal.color, shadowColor: meal.color, padding: Math.max(10, rs(12)) }] }>
                 <View style={styles.mealHeaderLeft}>
                   <View style={[styles.headerIconWrap, { backgroundColor: 'rgba(255,255,255,0.12)', width: Math.max(36, rs(42)), height: Math.max(36, rs(42)) }]}>
-                    <MaterialIcons name={mealIconName(meal.key)} size={Math.max(16, rs(18))} color="#fff" />
+                      <MaterialIcons name={mealIconName(meal.key)} size={Math.max(16, rs(18))} color={theme.colors.onPrimary} />
                   </View>
                   <View>
-                    <Text style={[styles.mealLabel, { color: '#fff', textShadowColor: meal.color, textShadowOffset: { width: 0, height: 6 }, textShadowRadius: 12, fontSize: Math.max(14, rs(16)) }]}>{meal.label}</Text>
-                    <Text style={[styles.mealTime, { color: 'rgba(255,255,255,0.9)', fontSize: Math.max(11, rs(12)) }]}>{meal.time}</Text>
+                      <Text style={[styles.mealLabel, { color: theme.colors.onPrimary, textShadowColor: meal.color, textShadowOffset: { width: 0, height: 6 }, textShadowRadius: 12, fontSize: Math.max(14, rs(16)) }]}>{meal.label}</Text>
+                      <Text style={[styles.mealTime, { color: 'rgba(255,255,255,0.9)', fontSize: Math.max(11, rs(12)) }]}>{meal.time}</Text>
                   </View>
                 </View>
                 <MaterialIcons name={isOpen ? 'expand-less' : 'chevron-right'} size={Math.max(22, rs(26))} color="rgba(255,255,255,0.95)" />
@@ -242,20 +243,20 @@ export default function HomeScreen() {
                       ))}
 
                       <View style={[styles.footerRow, { padding: 12, borderRadius: 12, marginTop: 14 }] }>
-                        <TouchableOpacity style={[styles.footerBtn, { backgroundColor: 'rgba(0,0,0,0.18)', borderColor: 'rgba(255,255,255,0.06)' }]} onPress={() => { setActiveReview(meal); setReviewModalVisible(true); }}>
-                          <View style={[styles.iconCircle, { backgroundColor: 'rgba(255,255,255,0.06)' }]}>
-                            <MaterialIcons name="rate-review" size={18} color={meal.color} />
-                          </View>
-                          <Text style={[styles.footerBtnText, { color: '#fff' }]}>Review</Text>
-                        </TouchableOpacity>
+                          <TouchableOpacity style={[styles.footerBtn, styles.reviewBtn]} onPress={() => { setActiveReview(meal); setReviewModalVisible(true); }}>
+                            <View style={[styles.iconCircle, styles.reviewIconBg]}>
+                              <MaterialIcons name="rate-review" size={18} color={meal.color} />
+                            </View>
+                            <Text style={[styles.reviewBtnText]}>Review</Text>
+                          </TouchableOpacity>
 
-                        <TouchableOpacity style={[styles.footerBtn, styles.outBtn, { backgroundColor: meal.color, shadowColor: meal.color }]} onPress={() => { setActiveOptOut(meal); setOptOutModalVisible(true); }}>
-                          <View style={[styles.iconCircle, { backgroundColor: 'rgba(255,255,255,0.12)' }]}>
-                            <MaterialIcons name="block" size={18} color="#fff" />
-                          </View>
-                          <Text style={[styles.footerBtnText, { color: '#fff' }]}>Opt out</Text>
-                        </TouchableOpacity>
-                      </View>
+                          <TouchableOpacity style={[styles.footerBtn, styles.optBtn, { backgroundColor: meal.color, shadowColor: meal.color }]} onPress={() => { setActiveOptOut(meal); setOptOutModalVisible(true); }}>
+                            <View style={[styles.iconCircle, styles.optIconBg]}>
+                              <MaterialIcons name="block" size={18} color={theme.colors.onPrimary} />
+                            </View>
+                            <Text style={[styles.optBtnText]}>Opt out</Text>
+                          </TouchableOpacity>
+                        </View>
                     </View>
                   )}
             </View>
@@ -306,7 +307,7 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   dateListContent: { paddingHorizontal: 60, alignItems: 'center' },
-  screen: { flex: 1, backgroundColor: '#fff' },
+  screen: { flex: 1 },
   header: 
   { 
     fontSize: 22, 
@@ -316,12 +317,12 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   dateStrip: { paddingLeft: 12, paddingBottom: 8},
-  dateItem: { width: 72, height: 72, borderRadius: 12, backgroundColor: '#f2f2f6', marginRight: 10, alignItems: 'center', justifyContent: 'center' },
-  dateItemActive: { backgroundColor: '#7c3aed', shadowColor: '#7c3aed', shadowOpacity: 0.4, shadowOffset: { width: 0, height: 8 }, shadowRadius: 16, elevation: 8 },
-  dateLabel: { fontSize: 12, color: '#666' },
-  dateLabelActive: { color: '#fff' },
+  dateItem: { width: 72, height: 72, borderRadius: 12, backgroundColor: theme.colors.neutralLight, marginRight: 10, alignItems: 'center', justifyContent: 'center' },
+  dateItemActive: { backgroundColor: theme.colors.primary, shadowColor: theme.shadows.default, shadowOpacity: 0.4, shadowOffset: { width: 0, height: 8 }, shadowRadius: 16, elevation: 8 },
+  dateLabel: { fontSize: 12, color: theme.colors.muted },
+  dateLabelActive: { color: theme.colors.onPrimary },
   dateDay: { fontSize: 20, fontWeight: '700', marginTop: 4 },
-  dateDayActive: { color: '#fff' },
+  dateDayActive: { color: theme.colors.onPrimary },
   meals: { flex: 1, paddingHorizontal: 16 },
   subHeader: 
   { 
@@ -331,30 +332,38 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   mealCard: { marginBottom: 12, borderRadius: 12, overflow: 'hidden', backgroundColor: 'transparent' },
-  mealCardShadow: { shadowColor: '#000', shadowOpacity: 0.12, shadowOffset: { width: 0, height: 10 }, shadowRadius: 24, elevation: 10 },
+  mealCardShadow: { shadowColor: theme.shadows.default, shadowOpacity: 0.12, shadowOffset: { width: 0, height: 10 }, shadowRadius: 24, elevation: 10 },
   mealHeader: { flexDirection: 'row', justifyContent: 'space-between', padding: 14, alignItems: 'center' },
   mealHeaderLeft: { flexDirection: 'row', alignItems: 'center' },
   headerIconWrap: { width: 42, height: 42, borderRadius: 10, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
   mealLabel: { fontSize: 16, fontWeight: '800' },
-  mealTime: { fontSize: 12, color: 'rgba(0,0,0,0.65)' },
+  mealTime: { fontSize: 12, color: 'rgba(255,255,255,0.9)' },
   mealBody: { padding: 14, borderBottomLeftRadius: 12, borderBottomRightRadius: 12, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.06)' },
   menuItem: { paddingVertical: 6, fontSize: 15 },
   footerRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 },
   footerBtn: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 14, borderRadius: 12, borderWidth: 1, borderColor: 'transparent' },
   outBtn: { /* placeholder: color applied inline */ },
-  footerBtnText: { color: '#fff', marginLeft: 10, fontWeight: '800' },
+  footerBtnText: { color: theme.colors.onPrimary, marginLeft: 10, fontWeight: '800' },
+  /* modern review button */
+  reviewBtn: { backgroundColor: theme.colors.card, borderColor: theme.colors.border, borderWidth: 1, paddingVertical: 10, paddingHorizontal: 14, borderRadius: 12, alignItems: 'center', flexDirection: 'row' },
+  reviewBtnText: { color: theme.colors.text, marginLeft: 10, fontWeight: '700' },
+  reviewIconBg: { backgroundColor: theme.colors.background, width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
+  /* modern opt-out button */
+  optBtn: { paddingVertical: 10, paddingHorizontal: 14, borderRadius: 12, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', elevation: 6 },
+  optBtnText: { color: theme.colors.onPrimary, marginLeft: 10, fontWeight: '800' },
+  optIconBg: { backgroundColor: 'rgba(255,255,255,0.12)', width: 34, height: 34, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
   iconCircle: { width: 34, height: 34, borderRadius: 10, alignItems: 'center', justifyContent: 'center', marginRight: 8 },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'center', padding: 16 },
-  modalCard: { backgroundColor: '#fff', borderRadius: 12, padding: 16 },
+  modalCard: { backgroundColor: theme.colors.background, borderRadius: 12, padding: 16 },
   modalTitle: { fontSize: 18, fontWeight: '700', marginBottom: 12 },
   starRow: { flexDirection: 'row', justifyContent: 'space-around', marginBottom: 12 },
-  modalInput: { minHeight: 80, borderWidth: 1, borderColor: '#eee', borderRadius: 8, padding: 8, textAlignVertical: 'top' },
+  modalInput: { minHeight: 80, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, padding: 8, textAlignVertical: 'top' },
   modalClose: { padding: 8 },
-  picker: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 12, borderWidth: 1, borderColor: '#eee', borderRadius: 8, marginTop: 8 },
-  pickerOptions: { marginTop: 8, backgroundColor: '#fff', borderRadius: 8, padding: 8, borderWidth: 1, borderColor: '#eee' },
+  picker: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 12, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, marginTop: 8 },
+  pickerOptions: { marginTop: 8, backgroundColor: theme.colors.background, borderRadius: 8, padding: 8, borderWidth: 1, borderColor: theme.colors.border },
   optOutButtonContainer: { alignItems: 'flex-end', paddingHorizontal: 12, marginTop: 6, marginBottom: 40 },
-  optOutButton: { backgroundColor: '#111', paddingVertical: 10, paddingHorizontal: 12, borderRadius: 10 },
-  optOutButtonText: { color: '#fff', fontWeight: '700' },
-  confirmBtn: { backgroundColor: '#06b6d4', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 8 },
-  confirmBtnText: { color: '#fff', fontWeight: '700' },
+  optOutButton: { backgroundColor: theme.colors.text, paddingVertical: 10, paddingHorizontal: 12, borderRadius: 10 },
+  optOutButtonText: { color: theme.colors.onPrimary, fontWeight: '700' },
+  confirmBtn: { backgroundColor: theme.colors.accent, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 8 },
+  confirmBtnText: { color: theme.colors.onPrimary, fontWeight: '700' },
 });

@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
-import { View, SafeAreaView } from 'react-native';
+import { View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HeaderBar from '../components/HeaderBar';
@@ -21,8 +22,8 @@ export default function RootNavigator() {
 
   return (
     <NavigationContainer ref={navRef}>
-      <SafeAreaView style={{ flex: 1 }}>
-  <HeaderBar title="CanteenConnect" onHamburgerPress={() => setMenuOpen(m => !m)} />
+      <SafeAreaView style={{ flex: 1 }} edges={["top", "left", "right"]}>
+        <HeaderBar title="CanteenConnect" onHamburgerPress={() => setMenuOpen(m => !m)} />
 
         <View style={{ flex: 1 }}>
           <Stack.Navigator screenOptions={{ headerShown: false }}>

@@ -2,13 +2,14 @@ import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, SectionList, Image } from 'react-native';
 import useResponsive from '../utils/responsive';
 import { SAMPLE } from '../data/updates';
+import theme from '../utils/theme';
 
-// categories palette and colors
+// categories palette and colors (use theme tokens)
 const CATEGORY_COLORS = {
-  'Mess Updates': '#4CAF50',
-  'Ticket / Issue Updates': '#2196F3',
-  'General Announcements': '#FFC107',
-  'Others': '#9E9E9E',
+  'Mess Updates': theme.colors.success,
+  'Ticket / Issue Updates': theme.colors.info,
+  'General Announcements': theme.colors.warn,
+  'Others': theme.colors.gray,
 };
 
 function groupByDate(items) {
@@ -33,9 +34,10 @@ export default function UpdatesScreen() {
   const sections = useMemo(() => groupByDate(SAMPLE), [SAMPLE]);
 
   function renderItem({ item }) {
+    const imgSource = typeof item.image === 'string' ? { uri: item.image } : item.image;
     return (
       <View style={[styles.updateRow, { padding: rs(12) }]}> 
-        <Image source={item.image} style={[styles.thumb, { width: rs(72), height: rs(72), borderRadius: rs(10) }]} />
+        <Image source={imgSource} style={[styles.thumb, { width: rs(72), height: rs(72), borderRadius: rs(10) }]} />
         <View style={styles.updateBody}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
             <View style={{ flex: 1, paddingRight: 8 }}>
@@ -52,7 +54,7 @@ export default function UpdatesScreen() {
             {/* category chip */}
             {(() => {
               const cat = item.category || 'Others';
-              const color = CATEGORY_COLORS[cat] || CATEGORY_COLORS['Others'];
+              const color = CATEGORY_COLORS[cat] || theme.colors.gray;
               return (
                 <View style={[styles.categoryChip, { backgroundColor: color }]}>
                   <Text style={styles.categoryText}>{cat}</Text>
@@ -76,7 +78,7 @@ export default function UpdatesScreen() {
   }
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, { backgroundColor: theme.colors.neutralLight }]}>
       <SectionList
         sections={sections}
         keyExtractor={item => item.id}
@@ -90,18 +92,18 @@ export default function UpdatesScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: '#f2f2f6' },
+  screen: { flex: 1 },
   sectionHeader: { alignItems: 'center', marginVertical: 12 },
-  sectionPill: { backgroundColor: '#e6e6ea', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16 },
-  sectionText: { color: '#333', fontWeight: '700' },
-  updateRow: { flexDirection: 'row', backgroundColor: '#fff', marginBottom: 10, borderRadius: 12, alignItems: 'center', shadowColor: '#000', shadowOpacity: 0.06, shadowOffset: { width: 0, height: 8 }, shadowRadius: 16, elevation: 3 },
+  sectionPill: { backgroundColor: theme.colors.neutralSoft, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16 },
+  sectionText: { color: theme.colors.text, fontWeight: '700' },
+  updateRow: { flexDirection: 'row', backgroundColor: theme.colors.background, marginBottom: 10, borderRadius: 12, alignItems: 'center', shadowColor: theme.shadows.default, shadowOpacity: 0.06, shadowOffset: { width: 0, height: 8 }, shadowRadius: 16, elevation: 3 },
   thumb: { width: 72, height: 72, borderRadius: 10, marginRight: 14, resizeMode: 'cover' },
   updateBody: { flex: 1 },
-  updateTitle: { color: '#111', fontWeight: '800', marginBottom: 6 },
-  updateDesc: { color: '#444', marginBottom: 8 },
-  updateTime: { color: '#777' },
+  updateTitle: { color: theme.colors.text, fontWeight: '800', marginBottom: 6 },
+  updateDesc: { color: theme.colors.muted, marginBottom: 8 },
+  updateTime: { color: theme.colors.muted },
   categoryChip: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999, alignSelf: 'flex-start' },
-  categoryText: { color: '#fff', fontWeight: '700', fontSize: 12 },
-  urgentBadge: { backgroundColor: '#F44336', width: 26, height: 26, borderRadius: 13, alignItems: 'center', justifyContent: 'center', marginTop: 6 },
-  urgentText: { color: 'white', fontWeight: '800' },
+  categoryText: { color: theme.colors.onPrimary, fontWeight: '700', fontSize: 12 },
+  urgentBadge: { backgroundColor: theme.colors.danger, width: 26, height: 26, borderRadius: 13, alignItems: 'center', justifyContent: 'center', marginTop: 6 },
+  urgentText: { color: theme.colors.onPrimary, fontWeight: '800' },
 });
