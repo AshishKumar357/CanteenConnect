@@ -134,43 +134,63 @@ export default function SlideMenu({ open, onClose, navRef }) {
         <ScrollView contentContainerStyle={[styles.menuContent, { paddingHorizontal: rs(12) }]}>
           <Text style={[styles.menuTitle, { fontSize: rs(18) }]} numberOfLines={1} ellipsizeMode="tail">Menu</Text>
 
-          <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('Home')}>
-            <MaterialIcons name="home" size={rs(18)} color={theme.colors.text} style={styles.menuIcon} />
-            <Text style={[styles.menuItemText, { fontSize: rs(14), color: theme.colors.text }]} numberOfLines={1} ellipsizeMode="tail">Home</Text>
-          </TouchableOpacity>
+          {/* Detect top-level route - if top is Mess show Mess-only menu (Issues + Sign out) */}
+          {navRef && navRef.isReady() && navRef.getCurrentRoute && navRef.getCurrentRoute().name === 'Mess' ? (
+            <>
+              <TouchableOpacity style={styles.menuItem} onPress={() => {
+                // navigate into Mess nested stack to MessIssues
+                closeMenu(() => { if (navRef && navRef.isReady()) navRef.navigate('Mess', { screen: 'MessIssues' }); });
+              }}>
+                <MaterialIcons name="report-problem" size={rs(18)} color={theme.colors.text} style={styles.menuIcon} />
+                <Text style={[styles.menuItemText, { fontSize: rs(14), color: theme.colors.text }]} numberOfLines={1} ellipsizeMode="tail">Issues</Text>
+              </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('Updates')}>
-            <MaterialIcons name="update" size={rs(18)} color={theme.colors.text} style={styles.menuIcon} />
-            <Text style={[styles.menuItemText, { fontSize: rs(14), color: theme.colors.text }]} numberOfLines={1} ellipsizeMode="tail">Updates</Text>
-            {getUnreadCount() > 0 && (
-              <View style={styles.unreadBadge}><Text style={styles.unreadText}>{getUnreadCount()}</Text></View>
-            )}
-          </TouchableOpacity>
+              <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('SignOut')}>
+                <MaterialIcons name="logout" size={rs(18)} color={theme.colors.text} style={styles.menuIcon} />
+                <Text style={[styles.menuItemText, { fontSize: rs(14), color: theme.colors.text }]} numberOfLines={1} ellipsizeMode="tail">Sign out</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <>
+              <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('Home')}>
+                <MaterialIcons name="home" size={rs(18)} color={theme.colors.text} style={styles.menuIcon} />
+                <Text style={[styles.menuItemText, { fontSize: rs(14), color: theme.colors.text }]} numberOfLines={1} ellipsizeMode="tail">Home</Text>
+              </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('Profile')}>
-            <MaterialIcons name="person" size={rs(18)} color={theme.colors.text} style={styles.menuIcon} />
-            <Text style={[styles.menuItemText, { fontSize: rs(14), color: theme.colors.text }]} numberOfLines={1} ellipsizeMode="tail">Profile</Text>
-          </TouchableOpacity>
+              <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('Updates')}>
+                <MaterialIcons name="update" size={rs(18)} color={theme.colors.text} style={styles.menuIcon} />
+                <Text style={[styles.menuItemText, { fontSize: rs(14), color: theme.colors.text }]} numberOfLines={1} ellipsizeMode="tail">Updates</Text>
+                {getUnreadCount() > 0 && (
+                  <View style={styles.unreadBadge}><Text style={styles.unreadText}>{getUnreadCount()}</Text></View>
+                )}
+              </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('Activity')}>
-            <MaterialIcons name="history" size={rs(18)} color={theme.colors.text} style={styles.menuIcon} />
-            <Text style={[styles.menuItemText, { fontSize: rs(14), color: theme.colors.text }]} numberOfLines={1} ellipsizeMode="tail">Activity</Text>
-          </TouchableOpacity>
+              <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('Profile')}>
+                <MaterialIcons name="person" size={rs(18)} color={theme.colors.text} style={styles.menuIcon} />
+                <Text style={[styles.menuItemText, { fontSize: rs(14), color: theme.colors.text }]} numberOfLines={1} ellipsizeMode="tail">Profile</Text>
+              </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('RaiseIssue')}>
-            <MaterialIcons name="report-problem" size={rs(18)} color={theme.colors.text} style={styles.menuIcon} />
-            <Text style={[styles.menuItemText, { fontSize: rs(14), color: theme.colors.text }]} numberOfLines={1} ellipsizeMode="tail">Raise an issue</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('Settings')}>
-            <MaterialIcons name="settings" size={rs(18)} color={theme.colors.text} style={styles.menuIcon} />
-            <Text style={[styles.menuItemText, { fontSize: rs(14), color: theme.colors.text }]} numberOfLines={1} ellipsizeMode="tail">Settings</Text>
-          </TouchableOpacity>
+              <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('Activity')}>
+                <MaterialIcons name="history" size={rs(18)} color={theme.colors.text} style={styles.menuIcon} />
+                <Text style={[styles.menuItemText, { fontSize: rs(14), color: theme.colors.text }]} numberOfLines={1} ellipsizeMode="tail">Activity</Text>
+              </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('SignOut')}>
-            <MaterialIcons name="logout" size={rs(18)} color={theme.colors.text} style={styles.menuIcon} />
-            <Text style={[styles.menuItemText, { fontSize: rs(14), color: theme.colors.text }]} numberOfLines={1} ellipsizeMode="tail">Sign out</Text>
-          </TouchableOpacity>
+              <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('RaiseIssue')}>
+                <MaterialIcons name="report-problem" size={rs(18)} color={theme.colors.text} style={styles.menuIcon} />
+                <Text style={[styles.menuItemText, { fontSize: rs(14), color: theme.colors.text }]} numberOfLines={1} ellipsizeMode="tail">Raise an issue</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('Settings')}>
+                <MaterialIcons name="settings" size={rs(18)} color={theme.colors.text} style={styles.menuIcon} />
+                <Text style={[styles.menuItemText, { fontSize: rs(14), color: theme.colors.text }]} numberOfLines={1} ellipsizeMode="tail">Settings</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('SignOut')}>
+                <MaterialIcons name="logout" size={rs(18)} color={theme.colors.text} style={styles.menuIcon} />
+                <Text style={[styles.menuItemText, { fontSize: rs(14), color: theme.colors.text }]} numberOfLines={1} ellipsizeMode="tail">Sign out</Text>
+              </TouchableOpacity>
+            </>
+          )}
         </ScrollView>
       </Animated.View>
     </>

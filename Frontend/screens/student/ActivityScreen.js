@@ -8,8 +8,8 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import useResponsive from "../utils/responsive";
-import theme from "../utils/theme";
+import useResponsive from "../../utils/responsive";
+import theme from "../../utils/theme";
 
 // sample issues with hierarchical responses per stage
 const ISSUES = [

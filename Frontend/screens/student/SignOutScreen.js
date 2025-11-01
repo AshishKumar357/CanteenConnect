@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import useResponsive from '../utils/responsive';
+import useResponsive from '../../utils/responsive';
 
 export default function SignOutScreen() {
   const { rs } = useResponsive();

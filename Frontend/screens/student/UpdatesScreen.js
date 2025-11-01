@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, SectionList, Image } from 'react-native';
-import useResponsive from '../utils/responsive';
-import { SAMPLE } from '../data/updates';
-import theme from '../utils/theme';
+import useResponsive from '../../utils/responsive';
+import { SAMPLE } from '../../data/updates';
+import theme from '../../utils/theme';
 
 // categories palette and colors (use theme tokens)
 const CATEGORY_COLORS = {

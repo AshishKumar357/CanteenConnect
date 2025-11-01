@@ -12,8 +12,9 @@ import {
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import useResponsive from '../utils/responsive';
-import theme from '../utils/theme';
+import useResponsive from '../../utils/responsive';
+import theme from '../../utils/theme';
+import issuesStore from '../../utils/issuesStore';
 
 const CATEGORIES = [
   'Quantity issue',
@@ -67,15 +68,26 @@ export default function RaiseIssueScreen() {
   function submit() {
     if (!title.trim()) return Alert.alert('Validation', 'Please enter a short title for the issue.');
     if (!description.trim()) return Alert.alert('Validation', 'Please provide a detailed description.');
-
-    // For now just show summary — integration with API/DB later
-    Alert.alert('Submitted', `Title: ${title}\nCategory: ${category}\nImages: ${images.length}`);
-
-    // reset form
-    setTitle('');
-    setDescription('');
-    setImages([]);
-    setCategory(CATEGORIES[0]);
+    // persist locally so mess users can see reported issues
+    (async () => {
+      try {
+        await issuesStore.saveIssue({
+          title: title.trim(),
+          details: description.trim(),
+          category,
+          media: images,
+        });
+        Alert.alert('Submitted', `Title: ${title}\nCategory: ${category}\nImages: ${images.length}`);
+      } catch (e) {
+        console.error(e);
+        Alert.alert('Error', 'Could not save the issue locally.');
+      }
+      // reset form
+      setTitle('');
+      setDescription('');
+      setImages([]);
+      setCategory(CATEGORIES[0]);
+    })();
   }
 
   return (

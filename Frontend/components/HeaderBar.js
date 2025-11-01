@@ -9,9 +9,8 @@ export default function HeaderBar({ title, onHamburgerPress }) {
   const insets = useSafeAreaInsets();
   // make sizes responsive to screen width
   // keep logo modestly sized relative to screen so it fits the header
-  const logoWidth = Math.min(120, Math.round(width * 0.22));
-  const logoHeight = Math.round(logoWidth * 0.44);
-  const titleFontSize = Math.max(14, rs(18));
+  const logoWidth = Math.min(120, Math.round(width * 0.2));
+  const logoHeight = Math.round(logoWidth * 0.4);
 
   // dynamic inner style replaces fixed height so header compresses on small screens
   // Keep vertical padding small to avoid extra empty space above the controls
@@ -31,8 +30,8 @@ export default function HeaderBar({ title, onHamburgerPress }) {
           </View>
         </View>
 
-        {/* ensure title has horizontal breathing room so it doesn't overlap left/right controls */}
-  <Text style={[styles.title, { fontSize: titleFontSize, marginHorizontal: 52, color: theme.colors.onPrimary }]} numberOfLines={1} ellipsizeMode="tail">{title}</Text>
+    {/* show app logo centered instead of a text title */}
+  <Image source={require('../assets/MessBuddy.png')} style={[styles.appLogo, { width: Math.round(logoWidth * 1.5), height: Math.round(logoHeight * 1.6) }]} resizeMode="fill" />
 
         <TouchableOpacity
           accessibilityLabel="Open menu"
@@ -77,6 +76,9 @@ const styles = StyleSheet.create({
   logo: {
     margin: 0,
     resizeMode: 'contain',
+  },
+  appLogo: {
+    alignSelf: 'center'
   },
   title: {
     color: theme.colors.onPrimary,

@@ -9,9 +9,9 @@ import {
   Alert,
   Dimensions,
 } from "react-native";
-import useResponsive from "../utils/responsive";
+import useResponsive from "../../utils/responsive";
 import { MaterialIcons } from "@expo/vector-icons";
-import theme from "../utils/theme";
+import theme from "../../utils/theme";
 
 export default function IssueDetailScreen({ route, navigation }) {
   const { issue } = route.params || {};

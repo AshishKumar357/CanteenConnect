@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
-import useResponsive from '../utils/responsive';
-import theme from '../utils/theme';
+import useResponsive from '../../utils/responsive';
+import theme from '../../utils/theme';
 
 function TogglePlaceholder({ title, description }) {
   const pulse = React.useRef(new Animated.Value(0)).current;
@@ -38,13 +38,18 @@ function TogglePlaceholder({ title, description }) {
   );
 }
 
-export default function SettingsScreen() {
+export default function SettingsScreen({ navigation }) {
   const { rs } = useResponsive();
   return (
     <View style={styles.container}>
       <Text style={[styles.title, { fontSize: Math.max(20, rs(22)), color: theme.colors.text }]}>Settings</Text>
 
       <View style={[styles.card, { backgroundColor: theme.colors.card }] }>
+        <TouchableOpacity style={{ paddingVertical: 10 }} onPress={() => navigation.navigate('ChangePassword')}>
+          <Text style={[styles.rowTitle, { fontSize: rs(16) }]}>Change password</Text>
+          <Text style={[styles.rowDesc, { marginTop: 6 }]}>Update your account password</Text>
+        </TouchableOpacity>
+
         <TogglePlaceholder title="Dark mode" description="A modern dark theme for the app." />
         <TogglePlaceholder title="Incognito mode" description="Hide activity and make submissions anonymous." />
       </View>

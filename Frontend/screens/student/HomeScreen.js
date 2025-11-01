@@ -15,11 +15,11 @@ import {
   Easing,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import ReviewModal from '../components/ReviewModal';
-import OptOutModal from '../components/OptOutModal';
-import OptOutRangeModal from '../components/OptOutRangeModal';
-import useResponsive from '../utils/responsive';
-import theme from '../utils/theme';
+import ReviewModal from '../../components/ReviewModal';
+import OptOutModal from '../../components/OptOutModal';
+import OptOutRangeModal from '../../components/OptOutRangeModal';
+import useResponsive from '../../utils/responsive';
+import theme from '../../utils/theme';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);

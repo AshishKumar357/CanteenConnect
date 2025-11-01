@@ -11,8 +11,8 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { MaterialIcons } from '@expo/vector-icons';
-import useResponsive from '../utils/responsive';
-import theme from '../utils/theme';
+import useResponsive from '../../utils/responsive';
+import theme from '../../utils/theme';
 
 export default function ProfileScreen() {
   // initial sample data
@@ -80,8 +80,8 @@ export default function ProfileScreen() {
           }}
     style={[styles.avatarWrapper, { width: avatarSize, height: avatarSize, borderRadius: Math.round(avatarSize / 2) }]}
         >
-          <Image
-            source={photo ? { uri: photo } : require('../assets/profile.png')}
+            <Image
+            source={photo ? { uri: photo } : require('../../assets/profile.png')}
             style={[styles.avatar, { width: avatarSize, height: avatarSize, borderRadius: Math.round(avatarSize / 2) }]}
           />
           {editing && (
